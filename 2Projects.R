@@ -1,5 +1,6 @@
+#Project 1 Violent Crimes and Elections
 rm(list = ls())
-setwd("~/Dropbox/IRHonors_2021-2022/Luopeiwen Yi/Assignment 3")
+setwd("~/Dropbox/IRHonors_2021-2022/Luopeiwen Yi/Project 1")
 load("/Users/Tina/Downloads/data_Colombia.RData")
 data <- read.csv("~/Dropbox/IRHonors_2021-2022/Luopeiwen Yi/Assignment 3/data_Colombia.RData")
 #number of observations 
@@ -61,9 +62,87 @@ stargazer(f2,i2,a2, digits = 2, omit = c("municipal_code", "municipality", "year
 #Regression controlling high conflicts 
 female_highconflict <- lm(female_candidates ~ homicides*high_conflict, data=data)
 summary(lm(female_candidates ~ homicides*high_conflict, data=data))
-
 indigenous_highconflict <- lm(indigenous_candidates ~ homicides*high_conflict, data=data)
 summary(lm(indigenous_candidates ~ homicides*high_conflict, data=data))
-
 afro_highconflict <- lm(afro_candidates ~ homicides*high_conflict, data=data)
 summary(lm(afro_candidates ~ homicides*high_conflict, data=data))
+
+#Project 2 
+rm(list = ls())
+library(dplyr) 
+library(ggplot2)
+library(stargazer)
+setwd("~/Dropbox/IRHonors_2021-2022/Luopeiwen Yi/Project 2")
+data <- read.csv("~/Dropbox/IRHonors_2021-2022/RLab/12-03-2021/Panel101.csv")
+data <- data[,-1]
+table(data$country)
+table(data$year)
+#Plots by country
+data %>% 
+  ggplot(aes(year,y, col = country)) +
+  geom_line()
+#Plots by country and year
+data %>% 
+  ggplot( aes(year, y)) +
+  geom_line() +
+  facet_wrap(~country)
+#no control
+m1 <- lm(y ~ x1 , data = data)
+#adding controls x2, x3
+m2 <- lm(y ~ x1 + x2 + x3, data = data)
+#adding controls and country fixed effect
+m3 <- lm(y ~ x1 + x2 + x3 + factor(country), data = data)
+#adding country fixed effect
+m4 <- lm(y ~ x1 + factor(country) , data = data)
+#adding country and year fixed effects
+m5 <- lm(y ~ x1 + factor(country) + factor(year), data = data)
+#adding controls, country, year fixed effects
+m6 <- lm(y ~ x1 + x2 + x3 + factor(country) + factor(year), data = data)
+#stargazer for m1,m2,m3,m4,m5,m6
+stargazer(m1, m2,m3,m4,m5, m6, digits = 2, omit = c("country", "year"), type = "text")
+rm(m1,m2,m3,m4,m5,m6)
+#diff-in-diff with treatment year 1993
+data$time <- ifelse(data$year > 1993,1,0)
+table(data$time, data$year)
+data$treatment <- ifelse(data$x1 > mean(data$x1, na.rm = T),1,0)
+table(data$treatment)
+colnames(data)[4] <- "y1"
+colnames(data)[7] <- "y2"
+colnames(data)[8] <- "y3"
+did1 <- lm(y1 ~ treatment*time + factor(country) + factor(year), data = data)
+did2 <- lm(y2 ~ treatment*time + factor(country) + factor(year), data = data)
+did3 <- lm(y3 ~ treatment*time + factor(country) + factor(year), data = data)
+#stargazer for did1,did2,did3
+stargazer(did1,did2,did3, digits = 2,omit = c("country", "year"), type = "text")
+
+data$Treat <-  as.factor(data$treatment)
+
+ggplot(filter(data, is.na(Treat) == F) , aes(year, y1, color =Treat)) + 
+  stat_summary(fun = "mean", geom = "line") + 
+  stat_summary(fun = "mean", geom = "point") +
+  geom_vline(xintercept = 1994) +
+  theme_minimal() + scale_x_continuous(breaks=seq(1990, 1999, 1))  + 
+  # ylim(0,100) + 
+  labs(title = "Examining pre-trends",
+       x = "Year",
+       y = "Outcome (y1)") 
+       
+ggplot(filter(data, is.na(Treat) == F) , aes(year, y2, color =Treat)) + 
+  stat_summary(fun = "mean", geom = "line") + 
+  stat_summary(fun = "mean", geom = "point") +
+  geom_vline(xintercept = 1994) +
+  theme_minimal() + scale_x_continuous(breaks=seq(1990, 1999, 1))  + 
+  # ylim(0,100) + 
+  labs(title = "Examining pre-trends",
+       x = "Year",
+       y = "Outcome (y2)") 
+       
+ggplot(filter(data, is.na(Treat) == F) , aes(year, y3, color =Treat)) + 
+  stat_summary(fun = "mean", geom = "line") + 
+  stat_summary(fun = "mean", geom = "point") +
+  geom_vline(xintercept = 1994) +
+  theme_minimal() + scale_x_continuous(breaks=seq(1990, 1999, 1))  + 
+  # ylim(0,100) + 
+  labs(title = "Examining pre-trends",
+       x = "Year",
+       y = "Outcome (y3)") 
