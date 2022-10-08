@@ -1,13 +1,5 @@
-#clears the global environment. 
 rm(list = ls())
-#Set the working directory
 setwd("~/Dropbox/IRHonors_2021-2022/Luopeiwen Yi/Assignment 3")
-#Loading the data 
-
-# -1 **IN ORDER TO UPLOAD THE DATA, YOU DO NOT NEED TO COPY IT INTO YOUR FOLDER, YOU CAN JUST CALL IT AS FOLLOWS: 
-#load("~/Dropbox/IRHonors_2021-2022/data_Colombia.RData")
-
-
 load("/Users/Tina/Downloads/data_Colombia.RData")
 data <- read.csv("~/Dropbox/IRHonors_2021-2022/Luopeiwen Yi/Assignment 3/data_Colombia.RData")
 #number of observations 
